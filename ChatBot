@@ -1,0 +1,43 @@
+import streamlit as st
+import openai
+
+# API Key
+openai.api_key = "API key"
+
+# Page configuration
+st.set_page_config(
+    page_title="Trial Chatbot",
+    page_icon="💬",
+    layout="centered"
+)
+
+# Sidebar
+with st.sidebar:
+    st.header("📔 My details")
+    st.markdown("I use: GPT-4o")
+    st.markdown("API: OpenRouter")
+    st.markdown("Made by: kiyaaaa")
+
+# Page title
+st.title("🤖 Streamlit ChatBot")
+
+# Useer Input
+user_prompt = st.chat_input("How may I help you kiyaaa....")
+
+if user_prompt:
+    # User message display
+    st.chat_message("user").markdown(user_prompt)
+
+    # User call->OPEM API
+    response = openai.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": user_prompt}
+        ]
+    )
+
+    # Bot response displa
+    assistant_response = response.choices[0].message.content
+    with st.chat_message("assistant"):
+        st.markdown(assistant_response)
