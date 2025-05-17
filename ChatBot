@@ -14,9 +14,9 @@ st.set_page_config(
 # Sidebar
 with st.sidebar:
     st.header("📔 My details")
-    st.markdown("I use: GPT-4o")
-    st.markdown("API: OpenRouter")
-    st.markdown("Made by: kiyaaaa")
+    st.write("I use: GPT-4o")
+    st.write("API: OpenRouter")
+    st.write("Made by: kiyaaaa")
 
 # Page title
 st.title("🤖 Streamlit ChatBot")
@@ -26,7 +26,7 @@ user_prompt = st.chat_input("How may I help you kiyaaa....")
 
 if user_prompt:
     # User message display
-    st.chat_message("user").markdown(user_prompt)
+    st.chat_message("user").write(user_prompt)
 
     # User call->OPEM API
     response = openai.chat.completions.create(
@@ -40,4 +40,4 @@ if user_prompt:
     # Bot response displa
     assistant_response = response.choices[0].message.content
     with st.chat_message("assistant"):
-        st.markdown(assistant_response)
+        st.write(assistant_response)
