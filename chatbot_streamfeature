@@ -6,7 +6,7 @@ openai.api_key = "API KEY"
 
 # Page configuration
 st.set_page_config(
-    page_title="Trial Chatbot",
+    page_title="Dumb Chatbot",
     page_icon="💬",
     layout="centered"
 )
