@@ -1,0 +1,48 @@
+import streamlit as st
+import openai
+
+# API Key
+openai.api_key = "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"
+
+# Page configuration
+st.set_page_config(
+    page_title="Trial Chatbot",
+    page_icon="💬",
+    layout="centered"
+)
+
+# Sidebar
+with st.sidebar:
+    st.header("📔 My details")
+    st.write("I use: GPT-4o")
+    st.write("API: OpenRouter")
+    st.write("Made by: kiyaaaa")
+
+# Page title
+st.title("🤖 Streamlit ChatBot")
+
+# Useer Input
+user_input = st.chat_input("How may I help you kiyaaa....")
+
+if user_input:
+    # User message 
+    st.chat_message("user").write(user_input)
+
+    # Ai response
+    with st.chat_message("assistant"):
+        response_box = st.empty()
+        response_text = ""
+        stream = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": user_input}],
+            stream=True
+        )
+
+        for word in stream:
+            content = word.choices[0].delta.content or ""
+            response_text += content
+            response_box.write(response_text)
+
+    
+
+   
