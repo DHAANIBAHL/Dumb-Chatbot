@@ -1,0 +1,105 @@
+# For UI rendering
+import streamlit as st
+# To set API key
+import openai
+# To integrate OpenAI's chat API
+from langchain.chat_models import ChatOpenAI
+# To store convo history
+from langchain.memory import ConversationBufferMemory
+# To link LLM & memory to chat system
+from langchain.chains import ConversationChain
+# To define roles
+from langchain.schema import HumanMessage, AIMessage
+
+# Page configuration
+st.set_page_config( 
+    page_title="Context Chatbot",
+    page_icon="💬",
+    layout="centered"
+)
+
+# API key parameter
+OPENAI_API_KEY = "api key"
+openai.api_key = OPENAI_API_KEY
+
+# Page title
+st.title("🤖 Streamlit ChatBot")
+st.subheader("Built with Streamlit, LangChain and GPT-4o")
+
+# Chat session 
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history=[]
+if "conversation" not in st.session_state:
+    llm = ChatOpenAI(
+        model_name="gpt-4o",
+        temperature=0.7,
+        openai_api_key=OPENAI_API_KEY
+    )
+
+    memory = ConversationBufferMemory(return_messages=True)
+    st.session_state.conversation = ConversationChain(
+        llm=llm,
+        memory=memory,
+        verbose=False
+    )
+
+# Display chat history
+for message in st.session_state.chat_history:
+    if isinstance(message, HumanMessage):
+        with st.chat_message("user"):
+            st.write(message.content)
+    elif isinstance(message, AIMessage):
+        with st.chat_message("assistant"):
+            st.write(message.content)
+
+# Get user input
+user_input = st.chat_input("Type your message here....")
+
+# Process input & generate response
+if user_input:
+    st.session_state.chat_history.append(HumanMessage(content=user_input))    
+    with st.chat_message("user"):
+        st.write(user_input)
+
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            response_box = st.empty()
+        response_text = ""
+
+        # Convert LangChain messages into OpenAI API format
+        messages = []
+        for msg in st.session_state.conversation.memory.chat_memory.messages:
+            if isinstance(msg, HumanMessage):
+                messages.append({"role": "user", "content": msg.content})
+            elif isinstance(msg, AIMessage):
+                messages.append({"role": "assistant", "content": msg.content})
+            
+        # Streaming response from OpenAI
+        stream = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=messages + [{"role": "user", "content": user_input}],
+            stream=True
+        )
+
+        for word in stream:
+            content = word.choices[0].delta.content or ""
+            response_text += content
+            response_box.write(response_text)
+
+    st.session_state.chat_history.append(AIMessage(content=response_text))
+    st.session_state.conversation.memory.chat_memory.add_user_message(user_input)
+    st.session_state.conversation.memory.chat_memory.add_ai_message(response_text)
+
+# Sidebar options
+with st.sidebar:
+    # About Section
+    st.subheader("About")
+    st.markdown(
+        """
+        ### 🛠️ Tech Used
+
+        - 📟 **Streamlit** — for interactive UI  
+        - 🧠 **LangChain** — to manage the conversation flow  
+        - 🧬 **GPT-4o** — the AI brain  
+        """
+    )
